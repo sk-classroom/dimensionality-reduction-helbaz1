@@ -68,7 +68,8 @@ class PrincipalComponentAnalysis:
         X_new : ndarray of shape (n_samples, n_components)
             Transformed values.
         """
-        pass
+        X_centered = X - self.mean
+        return np.dot(X_centered, self.components)
 
 
 # TODO: implement the LDA with numpy
@@ -106,7 +107,37 @@ class LinearDiscriminantAnalysis:
         5. Sort the eigenvectors by decreasing eigenvalues and choose k eigenvectors with the largest eigenvalues to form a d×k dimensional matrix W.
         6. Use this d×k eigenvector matrix to transform the samples onto the new subspace.
         """
-        pass
+        n_features = X.shape[1]
+        class_labels = np.unique(y)
+        
+        # Compute overall mean
+        mean_overall = np.mean(X, axis=0)
+        
+        # Within-class scatter matrix SW and between-class scatter matrix SB
+        SW = np.zeros((n_features, n_features))
+        SB = np.zeros((n_features, n_features))
+        
+        for label in class_labels:
+            X_class = X[y == label]
+            mean_class = np.mean(X_class, axis=0)
+            
+            # Within-class scatter matrix for current class
+            SW += np.dot((X_class - mean_class).T, (X_class - mean_class))
+            
+            # Between-class scatter
+            n_class = X_class.shape[0]
+            mean_diff = (mean_class - mean_overall).reshape(n_features, 1)
+            SB += n_class * np.dot(mean_diff, mean_diff.T)
+        
+        # Solve the generalized eigenvalue problem for SW^-1 * SB
+        eigenvalues, eigenvectors = np.linalg.eig(np.linalg.inv(SW).dot(SB))
+        
+        # Sort eigenvectors by eigenvalues in descending order
+        idx = np.argsort(eigenvalues)[::-1]
+        eigenvectors = eigenvectors[:, idx]
+        
+        # Select the top n_components
+        self.components = eigenvectors[:, :self.n_components]
 
     def transform(self, X: np.ndarray) -> np.ndarray:
         """
@@ -125,7 +156,7 @@ class LinearDiscriminantAnalysis:
         X_new : ndarray of shape (n_samples, n_components)
             Transformed values.
         """
-        pass
+        return np.dot(X, self.components)
 
 
 # TODO: Generating adversarial examples for PCA.
@@ -160,4 +191,17 @@ class AdversarialExamples:
             Cluster IDs. y[i] is the cluster ID of the i-th sample.
 
         """
-        pass
+        n_samples_per_cluster = n_samples // 2
+        # Cluster 1
+        mean1 = np.zeros(n_features)
+        mean1[0] = 1  # shift the first cluster along the first feature
+        cov1 = np.eye(n_features)  # identity covariance
+        
+        # Cluster 2
+        mean2 = np.zeros(n_features)
+        mean2[0] = 4  # shift the second cluster further along the first feature
+        cov2 = np.eye(n_features) * 0.5  # smaller variance
+        
+        # Generating samples
+        cluster1 = np.random.multivariate_normal(mean1, cov1, n_samples_per_cluster)
+        cluster2 = np.random.multivariate_normal(mean2, cov2, n_samples_per_cluster)

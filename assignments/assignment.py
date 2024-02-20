@@ -196,9 +196,9 @@ class AdversarialExamples:
         
         n_samples_per_cluster = n_samples // 2
 
-        # Adjusted means to ensure clear separation
+        # Ensure clear separation
         mean1 = [0, 0]
-        mean2 = [0, 10]  # Ensure separation along the second dimension
+        mean2 = [0, 10]  
 
         # High variance along the first dimension for both clusters
         cov1 = [[50, 0], [0, 1]]

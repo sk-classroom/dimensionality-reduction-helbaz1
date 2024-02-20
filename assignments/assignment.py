@@ -192,19 +192,24 @@ class AdversarialExamples:
 
         """
         n_samples_per_cluster = n_samples // 2
-        mean1 = np.zeros(n_features)
-        mean1[0] = 1  
-        cov1 = np.eye(n_features)  
         
-        mean2 = np.zeros(n_features)
-        mean2[0] = 4  
-        cov2 = np.eye(n_features) * 0.5  
-        
+        mean1 = [0, 0]
+        mean2 = [10, 0]  # Adjust the distance to ensure separability
+    
+        # Define covariances to create overlap after PCA
+        cov1 = [[1, 0], [0, 20]]  # High variance along the second dimension
+        cov2 = [[20, 0], [0, 1]]  # High variance along the first dimension
+    
+        # Ensure n_features is at least 2 for this example
+        if n_features < 2:
+            raise ValueError("n_features must be at least 2 for this adversarial example.")
+    
         # Generate samples for each cluster
         cluster1 = np.random.multivariate_normal(mean1, cov1, n_samples_per_cluster)
         cluster2 = np.random.multivariate_normal(mean2, cov2, n_samples_per_cluster)
-        
+    
         # Concatenate clusters to form the dataset
         X = np.vstack((cluster1, cluster2))
-        y = np.array([0]*n_samples_per_cluster + [1]*n_samples_per_cluster)
+        y = np.array([0] * n_samples_per_cluster + [1] * n_samples_per_cluster)
+    
         return X, y

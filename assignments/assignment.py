@@ -34,7 +34,22 @@ class PrincipalComponentAnalysis:
         self : object
             Returns the instance itself.
         """
-        pass
+                # Centering the data
+        self.mean = np.mean(X, axis=0)
+        X_centered = X - self.mean
+        
+        # Computing covariance matrix
+        covariance_matrix = np.cov(X_centered, rowvar=False)
+        
+        # Eigen decomposition
+        eigenvalues, eigenvectors = np.linalg.eigh(covariance_matrix)
+        
+        # Sorting eigenvectors by eigenvalues in descending order
+        idx = np.argsort(eigenvalues)[::-1]
+        eigenvectors = eigenvectors[:,idx]
+        
+        # Selecting the top n_components
+        self.components = eigenvectors[:, :self.n_components]
 
     def transform(self, X: np.ndarray) -> np.ndarray:
         """
@@ -53,7 +68,8 @@ class PrincipalComponentAnalysis:
         X_new : ndarray of shape (n_samples, n_components)
             Transformed values.
         """
-        pass
+        X_centered = X - self.mean
+        return np.dot(X_centered, self.components)
 
 
 # TODO: implement the LDA with numpy
@@ -91,7 +107,37 @@ class LinearDiscriminantAnalysis:
         5. Sort the eigenvectors by decreasing eigenvalues and choose k eigenvectors with the largest eigenvalues to form a d×k dimensional matrix W.
         6. Use this d×k eigenvector matrix to transform the samples onto the new subspace.
         """
-        pass
+        n_features = X.shape[1]
+        class_labels = np.unique(y)
+        
+        # Compute overall mean
+        mean_overall = np.mean(X, axis=0)
+        
+        # Within-class scatter matrix SW and between-class scatter matrix SB
+        SW = np.zeros((n_features, n_features))
+        SB = np.zeros((n_features, n_features))
+        
+        for label in class_labels:
+            X_class = X[y == label]
+            mean_class = np.mean(X_class, axis=0)
+            
+            # Within-class scatter matrix for current class
+            SW += np.dot((X_class - mean_class).T, (X_class - mean_class))
+            
+            # Between-class scatter
+            n_class = X_class.shape[0]
+            mean_diff = (mean_class - mean_overall).reshape(n_features, 1)
+            SB += n_class * np.dot(mean_diff, mean_diff.T)
+        
+        # Solve the generalized eigenvalue problem for SW^-1 * SB
+        eigenvalues, eigenvectors = np.linalg.eig(np.linalg.inv(SW).dot(SB))
+        
+        # Sort eigenvectors by eigenvalues in descending order
+        idx = np.argsort(eigenvalues)[::-1]
+        eigenvectors = eigenvectors[:, idx]
+        
+        # Select the top n_components
+        self.components = eigenvectors[:, :self.n_components]
 
     def transform(self, X: np.ndarray) -> np.ndarray:
         """
@@ -110,7 +156,7 @@ class LinearDiscriminantAnalysis:
         X_new : ndarray of shape (n_samples, n_components)
             Transformed values.
         """
-        pass
+        return np.dot(X, self.components)
 
 
 # TODO: Generating adversarial examples for PCA.
@@ -145,4 +191,23 @@ class AdversarialExamples:
             Cluster IDs. y[i] is the cluster ID of the i-th sample.
 
         """
-        pass
+        if n_features < 2:
+            raise ValueError("n_features must be at least 2 for this adversarial example.")
+        
+        n_samples_per_cluster = n_samples // 2
+
+        # Ensure clear separation
+        mean1 = [0, 0]
+        mean2 = [0, 10]  
+
+        # High variance along the first dimension for both clusters
+        cov1 = [[50, 0], [0, 1]]
+        cov2 = [[50, 0], [0, 1]]
+
+        cluster1 = np.random.multivariate_normal(mean1, cov1, n_samples_per_cluster)
+        cluster2 = np.random.multivariate_normal(mean2, cov2, n_samples_per_cluster)
+
+        X = np.vstack((cluster1, cluster2))
+        y = np.array([0] * n_samples_per_cluster + [1] * n_samples_per_cluster)
+
+        return X, y

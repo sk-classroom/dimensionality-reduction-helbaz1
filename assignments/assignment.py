@@ -124,7 +124,7 @@ class LinearDiscriminantAnalysis:
 # - You can set any covariance matrix, mean, and number of samples for the clusters.
 class AdversarialExamples:
     def __init__(self) -> None:
-        pass
+        
 
     def pca_adversarial_data(self, n_samples, n_features):
         """Generate adversarial examples for PCA
@@ -145,4 +145,4 @@ class AdversarialExamples:
             Cluster IDs. y[i] is the cluster ID of the i-th sample.
 
         """
-        pass
+        

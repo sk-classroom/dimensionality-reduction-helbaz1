@@ -192,16 +192,19 @@ class AdversarialExamples:
 
         """
         n_samples_per_cluster = n_samples // 2
-        # Cluster 1
         mean1 = np.zeros(n_features)
-        mean1[0] = 1  # shift the first cluster along the first feature
-        cov1 = np.eye(n_features)  # identity covariance
+        mean1[0] = 1  
+        cov1 = np.eye(n_features)  
         
-        # Cluster 2
         mean2 = np.zeros(n_features)
-        mean2[0] = 4  # shift the second cluster further along the first feature
-        cov2 = np.eye(n_features) * 0.5  # smaller variance
+        mean2[0] = 4  
+        cov2 = np.eye(n_features) * 0.5  
         
-        # Generating samples
+        # Generate samples for each cluster
         cluster1 = np.random.multivariate_normal(mean1, cov1, n_samples_per_cluster)
         cluster2 = np.random.multivariate_normal(mean2, cov2, n_samples_per_cluster)
+        
+        # Concatenate clusters to form the dataset
+        X = np.vstack((cluster1, cluster2))
+        y = np.array([0]*n_samples_per_cluster + [1]*n_samples_per_cluster)
+        return X, y

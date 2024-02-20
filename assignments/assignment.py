@@ -34,7 +34,22 @@ class PrincipalComponentAnalysis:
         self : object
             Returns the instance itself.
         """
-        pass
+                # Centering the data
+        self.mean = np.mean(X, axis=0)
+        X_centered = X - self.mean
+        
+        # Computing covariance matrix
+        covariance_matrix = np.cov(X_centered, rowvar=False)
+        
+        # Eigen decomposition
+        eigenvalues, eigenvectors = np.linalg.eigh(covariance_matrix)
+        
+        # Sorting eigenvectors by eigenvalues in descending order
+        idx = np.argsort(eigenvalues)[::-1]
+        eigenvectors = eigenvectors[:,idx]
+        
+        # Selecting the top n_components
+        self.components = eigenvectors[:, :self.n_components]
 
     def transform(self, X: np.ndarray) -> np.ndarray:
         """
@@ -124,7 +139,7 @@ class LinearDiscriminantAnalysis:
 # - You can set any covariance matrix, mean, and number of samples for the clusters.
 class AdversarialExamples:
     def __init__(self) -> None:
-        
+        pass
 
     def pca_adversarial_data(self, n_samples, n_features):
         """Generate adversarial examples for PCA
@@ -145,4 +160,4 @@ class AdversarialExamples:
             Cluster IDs. y[i] is the cluster ID of the i-th sample.
 
         """
-        
+        pass
